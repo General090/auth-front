@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react
 import axios from 'axios';
 
 // Set base URL for axios
-axios.defaults.baseURL = 'http://localhost:5000/api';
+axios.defaults.baseURL = BACKEND_URI;
+const BACKEND_URI=import.meta.env.BACKEND_URI
 
 // Auth context
 const AuthContext = React.createContext();
