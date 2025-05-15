@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react
 import axios from 'axios';
 
 // Set base URL for axios
-axios.defaults.baseURL = BACKEND_URI;
-const BACKEND_URI=import.meta.env.BACKEND_URI
+axios.defaults.baseURL = "https://auth-back-1-qdb6.onrender.com/";
 
 // Auth context
 const AuthContext = React.createContext();
@@ -106,7 +105,7 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/register', formData);
+      const response = await axios.post('https://auth-back-1-qdb6.onrender.com/register', formData);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify({
         id: response.data.userId,
@@ -188,7 +187,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/login', formData);
+      const response = await axios.post('https://auth-back-1-qdb6.onrender.com/login', formData);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify({
         id: response.data.userId,
