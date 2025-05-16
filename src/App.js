@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -6,8 +6,62 @@ import axios from 'axios';
 axios.defaults.baseURL = "https://auth-back-1-qdb6.onrender.com";
 axios.defaults.withCredentials = true;
 
-// Auth context
-const AuthContext = React.createContext();
+export const AuthContext = React.createContext();
+
+function Register() {
+  const { setAuthState } = React.useContext(AuthContext);
+  const [formData, setFormData] = React.useState({ username: '', email: '', password: '' });
+  const [message, setMessage] = React.useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/register', formData);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify({
+        id: response.data.userId,
+        username: response.data.username
+      }));
+      setAuthState({
+        isAuthenticated: true,
+        user: {
+          id: response.data.userId,
+          username: response.data.username
+        },
+        token: response.data.token
+      });
+      navigate('/profile');
+    } catch (error) {
+      setMessage(error.response?.data?.message || 'Registration failed.');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Username"
+        value={formData.username}
+        onChange={e => setFormData({ ...formData, username: e.target.value })}
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        value={formData.email}
+        onChange={e => setFormData({ ...formData, email: e.target.value })}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={formData.password}
+        onChange={e => setFormData({ ...formData, password: e.target.value })}
+      />
+      <button type="submit">Register</button>
+      <p>{message}</p>
+    </form>
+  );
+}
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -17,34 +71,33 @@ function App() {
     isLoading: true
   });
 
-  // Check auth status on app load
+  // Check auth status
   useEffect(() => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
-    
+
     if (token && user) {
-      // Verify token is still valid
       axios.get('/profile/' + user.id, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      .then(() => {
-        setAuthState({
-          isAuthenticated: true,
-          user,
-          token,
-          isLoading: false
+        .then(() => {
+          setAuthState({
+            isAuthenticated: true,
+            user,
+            token,
+            isLoading: false
+          });
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setAuthState({
+            isAuthenticated: false,
+            user: null,
+            token: null,
+            isLoading: false
+          });
         });
-      })
-      .catch(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setAuthState({
-          isAuthenticated: false,
-          user: null,
-          token: null,
-          isLoading: false
-        });
-      });
     } else {
       setAuthState(prev => ({ ...prev, isLoading: false }));
     }
@@ -57,95 +110,33 @@ function App() {
   return (
     <AuthContext.Provider value={{ authState, setAuthState }}>
       <Router>
-        <div className="container">
-          <nav className="navbar">
-            <Link to="/">Home</Link>
-            {!authState.isAuthenticated ? (
-              <>
-                <Link to="/register">Register</Link>
-                <Link to="/login">Login</Link>
-              </>
-            ) : (
-              <>
-                <Link to="/profile">Profile</Link>
-                <button onClick={() => {
-                  localStorage.removeItem('token');
-                  localStorage.removeItem('user');
-                  setAuthState({
-                    isAuthenticated: false,
-                    user: null,
-                    token: null
-                  });
-                }}>Logout</button>
-              </>
-            )}
-          </nav>
-          
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile" element={<Profile />} />
-          </Routes>
-        </div>
+        <nav>
+          <Link to="/">Home</Link>
+          {!authState.isAuthenticated ? (
+            <>
+              <Link to="/register">Register</Link>
+              <Link to="/login">Login</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/profile">Profile</Link>
+              <button onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setAuthState({ isAuthenticated: false, user: null, token: null });
+              }}>Logout</button>
+            </>
+          )}
+        </nav>
+
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          {/* Add Login, Profile components similarly */}
+        </Routes>
       </Router>
     </AuthContext.Provider>
   );
 }
 
-// [Keep your Home, Register, Login, Profile components with these changes below]
 
-// In Register and Login components:
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await axios.post('/api/register', formData); // Changed to relative path
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify({
-      id: response.data.userId,
-      username: response.data.username
-    }));
-    setAuthState({
-      isAuthenticated: true,
-      user: {
-        id: response.data.userId,
-        username: response.data.username
-      },
-      token: response.data.token
-    });
-    navigate('/profile');
-  } catch (error) {
-    setMessage(error.response?.data?.message || 
-      error.message || 
-      'Registration failed. Please try again.');
-  }
-};
-
-// In Profile component:
-const fetchProfile = async () => {
-  try {
-    const response = await axios.get(`/api/profile/${authState.user.id}`, {
-      headers: {
-        Authorization: `Bearer ${authState.token}`
-      }
-    });
-    setProfile(response.data);
-    setFormData({
-      username: response.data.username,
-      email: response.data.email,
-      password: ''
-    });
-  } catch (error) {
-    if (error.response?.status === 401) {
-      // Token expired - force logout
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setAuthState({
-        isAuthenticated: false,
-        user: null,
-        token: null
-      });
-    }
-    setMessage(error.response?.data?.message || 'Error loading profile');
-  }
-};
+export default App;
