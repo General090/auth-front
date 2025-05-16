@@ -4,7 +4,7 @@ import axios from 'axios';
 import './App.css'
 
 // Configure axios
-axios.defaults.baseURL = "http://localhost:5000";
+axios.defaults.baseURL = "https://auth-back-1-qdb6.onrender.com";
 axios.defaults.withCredentials = true;
 
 export const AuthContext = React.createContext();
