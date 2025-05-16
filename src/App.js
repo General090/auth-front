@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './App.css'
 
 // Configure axios
-axios.defaults.baseURL = "https://auth-back-1-qdb6.onrender.com";
+axios.defaults.baseURL = "http://localhost:5000";
 axios.defaults.withCredentials = true;
 
 export const AuthContext = React.createContext();
@@ -58,6 +59,57 @@ function Register() {
         onChange={e => setFormData({ ...formData, password: e.target.value })}
       />
       <button type="submit">Register</button>
+      <p>{message}</p>
+    </form>
+  );
+}
+
+
+function Login() {
+  const { setAuthState } = React.useContext(AuthContext);
+  const [formData, setFormData] = React.useState({ username: '', password: '' });
+  const [message, setMessage] = React.useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/login', formData);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify({
+        id: response.data.userId,
+        username: response.data.username
+      }));
+      setAuthState({
+        isAuthenticated: true,
+        user: {
+          id: response.data.userId,
+          username: response.data.username
+        },
+        token: response.data.token
+      });
+      navigate('/profile');
+    } catch (error) {
+      setMessage(error.response?.data?.message || 'Login failed.');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Username"
+        value={formData.username}
+        onChange={e => setFormData({ ...formData, username: e.target.value })}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={formData.password}
+        onChange={e => setFormData({ ...formData, password: e.target.value })}
+      />
+      <button type="submit">Login</button>
       <p>{message}</p>
     </form>
   );
@@ -131,6 +183,11 @@ function App() {
 
         <Routes>
           <Route path="/register" element={<Register />} />
+          {/* Add Login, Profile components similarly */}
+        </Routes>
+
+        <Routes>
+          <Route path="/login" element={<Login />} />
           {/* Add Login, Profile components similarly */}
         </Routes>
       </Router>
