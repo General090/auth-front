@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react
 import axios from 'axios';
 
 // Configure axios
-axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = 'https://auth-back-w4gd.onrender.com';
 axios.defaults.withCredentials = true;
 
 axios.interceptors.request.use((config) => {
