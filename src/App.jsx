@@ -157,7 +157,7 @@ function Profile({ handleLogout }) {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`/api/profile/${authState.user}`, profileData);
+      await axios.put(`/api/profile/${authState.userId}`, profileData);
       setMessage('Profile updated successfully!');
       setProfileData(prev => ({ ...prev, password: '' }));
     } catch (err) {
@@ -167,7 +167,7 @@ function Profile({ handleLogout }) {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/api/profile/${authState.userId}`);
+      await axios.delete(`/api/profile/${authState.User}`);
       handleLogout();
       navigate('/register');
     } catch (err) {
