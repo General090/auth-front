@@ -185,6 +185,7 @@ function Profile({ handleLogout }) {
           value={profileData.username}
           onChange={e => setProfileData({ ...profileData, username: e.target.value })}
           placeholder="Username"
+          required
         />
         <input
           type="email"
@@ -192,6 +193,7 @@ function Profile({ handleLogout }) {
           value={profileData.email}
           onChange={e => setProfileData({ ...profileData, email: e.target.value })}
           placeholder="Email"
+          required
         />
         <input
           type="password"
@@ -199,6 +201,7 @@ function Profile({ handleLogout }) {
           value={profileData.password}
           onChange={e => setProfileData({ ...profileData, password: e.target.value })}
           placeholder="New Password (leave empty to keep current)"
+          required
         />
         <button onClick={handleUpdate} className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded mb-2">
           Save Changes
