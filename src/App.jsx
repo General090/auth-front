@@ -5,7 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Configure axios
-axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = 'https://auth-back-w4gd.onrender.com';
 axios.defaults.withCredentials = true;
 
 axios.interceptors.request.use((config) => {
