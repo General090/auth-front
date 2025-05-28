@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Configure axios
-axios.defaults.baseURL = 'https://auth-back-w4gd.onrender.com';
+axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
 
 axios.interceptors.request.use((config) => {
@@ -33,11 +35,15 @@ function Register() {
         user: response.data.user,
         token: response.data.token
       });
+      toast.success('Registration successful!');
       navigate('/profile');
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Registration failed.');
+      const msg = error.response?.data?.message || 'Registration failed.';
+      toast.error(msg);
+      setMessage(msg);
     }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -69,10 +75,11 @@ function Register() {
           required
           minLength="6"
         />
-        <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">
+        <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded cursor-pointer mb-4">
           Register
         </button>
         {message && <p className="text-red-500 mt-3 text-center">{message}</p>}
+        <p className='text-center text-blue-500 underline cursor-pointer '><a>Forgot Password?</a></p>
       </form>
     </div>
   );
@@ -89,21 +96,23 @@ function Login() {
     try {
       const response = await axios.post('/api/login', formData);
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId',  JSON.stringify(response.data.userId));
-      localStorage.setItem('username',  JSON.stringify(response.data.username));
+      localStorage.setItem('userId', JSON.stringify(response.data.userId));
+      localStorage.setItem('username', JSON.stringify(response.data.username));
       setAuthState({
         isAuthenticated: true,
         userId: response.data.userId,
         token: response.data.token,
         username: response.data.username
       });
+      toast.success('Login successful!');
       navigate('/profile');
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Login failed.');
+      const msg = error.response?.data?.message || 'Login failed.';
+      toast.error(msg);
+      setMessage(msg);
     }
-
-    
   };
+  
 
 
   return (
@@ -126,7 +135,7 @@ function Login() {
           onChange={e => setFormData({ ...formData, password: e.target.value })}
           required
         />
-        <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">
+        <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 cursor-pointer rounded">
           Login
         </button>
         {message && <p className="text-red-500 mt-3 text-center">{message}</p>}
@@ -203,13 +212,13 @@ function Profile({ handleLogout }) {
           placeholder="New Password (leave empty to keep current)"
           required
         />
-        <button onClick={handleUpdate} className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded mb-2">
+        <button onClick={handleUpdate} className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded mb-2 cursor-pointer">
           Save Changes
         </button>
-        <button onClick={handleLogout} className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded mb-2">
+        <button onClick={handleLogout} className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded mb-2 cursor-pointer">
           Logout
         </button>
-        <button onClick={handleDelete} className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded">
+        <button onClick={handleDelete} className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded cursor-pointer">
           Delete Account
         </button>
         {message && <p className="text-center mt-3 text-sm text-gray-700">{message}</p>}
@@ -333,8 +342,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile handleLogout={handleLogout} />} />
       </Routes>
+
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
     </AuthContext.Provider>
   );
+
 }
 
 export default function AppWrapper() {
